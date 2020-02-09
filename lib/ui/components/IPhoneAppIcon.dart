@@ -26,6 +26,10 @@ class IPhoneAppIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        if (this.item.action != null){
+          this.item.action();
+          return;
+        }
           showDialog(
           context:context,
           builder: (BuildContext context) => new CupertinoAlertDialog(

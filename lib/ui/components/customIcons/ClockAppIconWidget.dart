@@ -29,13 +29,23 @@ class _ClockAppIconWidgetState extends State<ClockAppIconWidget> {
            color: Colors.white,
            shape: BoxShape.circle,
          ),
-         child: CustomPaint(painter: ClockDialPainter(),),
+         child: Stack(
+           fit: StackFit.expand,
+           children: [
+              CustomPaint(
+               painter: ClockNumbersPainter(),
+              ),
+              CustomPaint(
+                painter: ClockDialPainter(hours: DateTime.now().hour, minutes: DateTime.now().minute),
+              )
+           ],
+         ),
        )
     );
   }
 }
 
-class ClockDialPainter extends CustomPainter {
+class ClockNumbersPainter extends CustomPainter {
   final tickPaint = Paint();
   final TextPainter textPainter = TextPainter(
           textAlign: TextAlign.center,
@@ -83,6 +93,58 @@ class ClockDialPainter extends CustomPainter {
 
     canvas.restore();
   }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class ClockDialPainter extends CustomPainter {
+  final paintHour = Paint();
+  
+  int hours = 3;
+  int minutes = 10;
+
+  ClockDialPainter({this.hours=17, this.minutes=42}) {
+    paintHour.color = Colors.black87;
+    paintHour.style = PaintingStyle.fill;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // final angle = 2 * pi / 12;
+    final radius = size.width/2;
+
+    canvas.save();
+    canvas.translate(radius, radius);
+    
+    int hours12 = this.hours >= 12 ? this.hours-12 : this.hours;
+    int minutes60 = this.minutes == 0 ? 60 : this.minutes;
+    double hourRotate = 2*pi*((hours12/12)+(this.minutes/720));
+    canvas.rotate(hourRotate);
+
+    Path path = Path();
+
+    //shape hand stem
+    path.moveTo(0.0, -radius+(radius/3));
+    path.lineTo(-2.0, 1.0);
+    path.lineTo(3.0, 0.0);
+    path.lineTo(1.0, -radius+(radius/3));
+    path.close();
+    canvas.drawPath(path, paintHour);
+
+    canvas.rotate(-hourRotate); 
+    canvas.rotate(2*pi*((minutes60)/60)); 
+    path.moveTo(-1.0, -radius+(radius/5));
+    path.lineTo(-2.0, 0.0);
+    path.lineTo(2.0, 0.0);
+    path.lineTo(1.0, -radius+(radius/5));
+
+    path.close();
+    canvas.drawPath(path, paintHour);
+    canvas.restore();
+  }
+
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return false;
